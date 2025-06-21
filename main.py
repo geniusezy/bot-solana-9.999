@@ -6,6 +6,7 @@ DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1385624443975499787/MVHk
 BINANCE_ADDRESSES = ["5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9"]
 
 def send_discord_alert(message):
+    print(f"Envoi Discord : {message}")
     data = {"content": message}
     requests.post(DISCORD_WEBHOOK_URL, json=data)
 
@@ -13,16 +14,20 @@ def is_wallet_fresh(address):
     url = f"https://api.helius.xyz/v0/addresses/{address}/transactions?api-key={HELIUS_API_KEY}&limit=1"
     resp = requests.get(url)
     txs = resp.json()
+    print(f"Vérification wallet frais {address} : {len(txs)} tx trouvées")
     return len(txs) == 1
 
 def monitor():
     fresh_wallets = set()
+    print("Bot Solana lancé, surveillance en cours...")
     while True:
         for binance in BINANCE_ADDRESSES:
+            print(f"Vérification des transactions pour {binance}")
             url = f"https://api.helius.xyz/v0/addresses/{binance}/transactions?api-key={HELIUS_API_KEY}&limit=10"
             resp = requests.get(url)
             txs = resp.json()
             for tx in txs:
+                print(f"Transaction trouvée : {tx}")
                 if (
                     tx.get("type") == "TRANSFER"
                     and tx.get("amount", 0) == 9.999
